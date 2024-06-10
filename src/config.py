@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DB_PROD_PASS: str
     DB_PROD_NAME: str
 
-    FRONTENTD_HOST: str
+    FRONTEND_HOST: str
     FRONTEND_PORT: int
 
     @property
