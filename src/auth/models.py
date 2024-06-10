@@ -1,22 +1,27 @@
+from enum import Enum
+import uuid
+
 from fastapi import Depends
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
 from fastapi_users_db_sqlalchemy.access_token import (
     SQLAlchemyAccessTokenDatabase,
     SQLAlchemyBaseAccessTokenTableUUID,
 )
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Base, get_db
+
 from src.enums import UserRole
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
 
-    role: Mapped[UserRole] = mapped_column(default=UserRole.RECRUITER, nullable=False)
+    role: Mapped[UserRole] = mapped_column(default=UserRole.SPECIALIST)
 
 
 class AccessToken(SQLAlchemyBaseAccessTokenTableUUID, Base):
+
     pass
 
 

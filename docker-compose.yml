@@ -1,0 +1,81 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: api
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - ${WEBHOOK_PORT}:${WEBHOOK_PORT}
+    networks:
+      - app
+    depends_on:
+      - pgbouncer
+      - redis
+    volumes:
+      - ./api:/usr/src/app/api
+      - ./migrations:/usr/src/app/migrations
+
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_PROD_USER}
+      - POSTGRES_PASSWORD=${DB_PROD_PASS}
+      - POSTGRES_DB=${DB_PROD_NAME}
+      - PGDATA='/var/lib/postgresql/data/pgdata'
+    networks:
+      - app
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  pgbouncer:
+    image: edoburu/pgbouncer
+    container_name: pgbouncer
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - DB_USER=${DB_PROD_USER}
+      - DB_PASSWORD=${DB_PROD_PASS}
+      - DB_HOST=postgres
+      - POOL_MODE=session
+      - MAX_DB_CONNECTIONS=0
+      - DEFAULT_POOL_SIZE=40
+      - ADMIN_USERS=postgres,${DB_PROD_USER}
+      - AUTH_TYPE=scram-sha-256
+    ports:
+      - ${DB_PROD_PORT}:${DB_PROD_PORT}
+    expose:
+      - ${DB_PROD_PORT}
+    depends_on:
+      - postgres
+    networks:
+      - app
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    networks:
+      - app
+    volumes:
+      - redis-data:/bitnami/redis/data
+
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  postgres-data: {}
+  redis-data: {}

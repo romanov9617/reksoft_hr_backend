@@ -13,6 +13,9 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
     [auth_backend],
 )
 
+current_active_user = fastapi_users.current_user(active=True)
+verified_user = fastapi_users.current_user(verified=True)
+
 router = APIRouter()
 
 router.include_router(

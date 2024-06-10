@@ -1,31 +1,31 @@
-import uuid
-from typing import Optional
+from uuid import UUID
 
-from fastapi import Depends, Request
+from fastapi import Request, Response, Depends
 from fastapi_users import BaseUserManager, UUIDIDMixin
 
 from src.auth.models import User, get_user_db
 
-SECRET = "SECRET"
 
+class UserManager(UUIDIDMixin, BaseUserManager[User, UUID]):
 
-class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
-    reset_password_token_secret = SECRET
-    verification_token_secret = SECRET
+    reset_password_token_secret = "SECRET"
+    verification_token_secret = "SECRET"
 
-    async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} has registered.")
+    async def on_after_register(
+        self, user: User, request: Request | None = None
+    ) -> None:
+        return await super().on_after_register(user, request)
 
-    async def on_after_forgot_password(
-        self, user: User, token: str, request: Optional[Request] = None
-    ):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
-
-    async def on_after_request_verify(
-        self, user: User, token: str, request: Optional[Request] = None
-    ):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
+    async def on_after_login(
+        self,
+        user: User,
+        request: Request | None = None,
+        response: Response | None = None,
+    ) -> None:
+        return await super().on_after_login(user, request, response)
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):
     yield UserManager(user_db)
+
+
